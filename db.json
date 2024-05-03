@@ -1,0 +1,134 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "Project 1",
+      "description": "A sample project.",
+      "date": "2023-04-01",
+      "access": {
+        "admin": [
+          1
+        ],
+        "editor": [
+          2
+        ],
+        "reader": [
+          3
+        ]
+      },
+	        "tasks": [
+        {
+          "id": 1,
+          "description": "Initial task for Project 1",    
+          "assignee": {
+            "userId": 1
+            }
+        },
+        {
+          "id": 2,
+          "description": "Follow-up task for Project 1",
+          "assignee": {
+            "userId": 2
+            }
+        },
+        {
+          "id": 5,
+          "description": "Another task for Project 1",
+          "assignee": {
+            "userId": 3
+            }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Project 2",
+      "description": "Another sample project.",
+      "date": "2023-04-02",
+      "access": {
+        "admin": [
+          2
+        ],
+        "editor": [
+          3
+        ],
+        "reader": [
+          1
+        ]
+      },
+      "tasks": [
+        {
+          "id": 3,
+          "description": "Initial task for Project 2",
+          "assignee": {
+            "userId": 3
+            }
+        },
+        {
+          "id": 4,
+          "description": "Follow-up task for Project 2",
+          "assignee": {
+            "userId": 2
+            }
+        },
+        {
+          "id": 6,
+          "description": "Another task for Project 2",
+          "assignee": {
+            "userId": 1
+            }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Project 3",
+      "description": "Third sample project.",
+      "date": "2023-05-03",
+      "access": {
+        "admin": [
+          3
+        ],
+        "editor": [
+          2
+        ],
+        "reader": [
+          0
+        ]
+      },
+      "tasks": [
+        {
+          "id": 7,
+          "description": "Initial task for Third Project",
+          "assignee": {
+            "userId": 3
+            }
+        },
+        {
+          "id": 8,
+          "description": "Follow-up task for P-3",
+          "assignee": {
+            "userId": 2
+            }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "UserOne",
+      "password": "passwordOne"
+    },
+    {
+      "id": 2,
+      "username": "UserTwo",
+      "password": "passwordTwo"
+    },
+    {
+      "id": 3,
+      "username": "UserThree",
+      "password": "passwordThree"
+    }
+  ]
+}
