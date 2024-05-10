@@ -1,6 +1,6 @@
 import TaskAssignment from "./TaskAssignment";
 
-const TaskList = ({ tasks, removeTask }) => {
+const TaskList = ({ tasks }) => {
   console.log("TaskList - Tasks:", tasks);
 
   return (
@@ -11,12 +11,6 @@ const TaskList = ({ tasks, removeTask }) => {
             <span className= "place-items-start">{task.description}</span>
             <div className= " snap-end flex flex-row">
             <TaskAssignment taskId={task.id} />
-            <button
-              className="px-4 py-2 hover:bg-red-700 rounded-md"
-              onClick={() => removeTask(task.id)}
-            >
-              Clear
-            </button>
             </div>
           </li>
         ))}

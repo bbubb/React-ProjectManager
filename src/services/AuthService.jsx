@@ -1,3 +1,4 @@
+// AuthService
 export const authenticateUser = async ({ username, password }) => {
   console.log("Fetching user data from server:", username);
   try {

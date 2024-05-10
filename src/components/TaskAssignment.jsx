@@ -1,114 +1,104 @@
-import React, { useState, useEffect, useContext } from "react";
+// TaskAssignment
+import React, { useState, useEffect } from "react";
 import { useProject } from "../contexts/ProjectProvider";
 import Select from "react-select";
+import { useAssignTaskToUser } from "../services/ProjectService";
+import { useFetchTaskEligibleUsers } from "../services/UserService";
 
 const TaskAssignment = ({ taskId }) => {
-  console.log("TaskAssignment taskId:", taskId);
-  const { fetchTaskEligibleUsers, selectedProject } =
-    useProject();
+  const { selectedProject } = useProject();
+  const {
+    data: users,
+    isLoading: loadingUsers,
+    isError: usersError,
+    error: errorDetails,
+  } = useFetchTaskEligibleUsers(selectedProject?.id, taskId);
+  const assignMutation = useAssignTaskToUser();
   const [selectedUser, setSelectedUser] = useState(null);
-  const [userOptions, setUserOptions] = useState([]);
+  const [options, setOptions] = useState([]);
+
+  console.log("Selected Project:", selectedProject.id, "Task ID:", taskId);
+  console.log("Eligible Task Users:", users);
 
   useEffect(() => {
-    if (selectedProject && taskId) {
-      const fetchUsers = async () => {
-        try {
-          console.log ("selectedProject.id:", selectedProject.id, "taskId:", taskId);
-          const users = await getEligibleUsersForTask(
-            selectedProject.id,
-            taskId
-          );
-          const options = users.map((user) => ({
-            value: user.id,
-            label: user.username,
-          }));
-          setUserOptions(options);
-          setSelectedUser(options.length > 0 ? options[0] : null);
-        } catch (error) {
-          console.error("Error fetching eligible users:", error);
-          setUserOptions([]);
-          setSelectedUser(null);
-        }
-      };
+    if (users && users.eligibleUsers) {
+      const userOptions = users.eligibleUsers.map((user) => ({
+        value: user.id,
+        label: user.username,
+      }));
 
-      fetchUsers();
-      console.log("project:", selectedProject, "taskId:", taskId);
-    }
-  }, [selectedProject, taskId, getEligibleUsersForTask]);
+      setOptions(userOptions);
 
-  const handleAssign = async () => {
-    if (selectedUser && selectedProject && taskId) {
-      try {
-        await assignUserToTask(selectedProject.id, taskId, selectedUser.value);
-        alert("Task assigned successfully!");
-      } catch (error) {
-        alert("Failed to assign task: " + error.message);
+      if (users.assignee && users.assignee.userId !== null) {
+        const assigneeOption = userOptions.find(
+          (option) => option.value === users.assignee.userId
+        );
+        setSelectedUser(assigneeOption);
+      } else {
+        setSelectedUser(null);
       }
+    }
+  }, [users]);
+
+  const handleAssign = () => {
+    if (selectedUser) {
+      console.log(
+        `Assigning task ${taskId} to user ${selectedUser.value} in project ${selectedProject.id}`
+      );
+      assignMutation.mutate({
+        projectId: selectedProject.id,
+        taskId: taskId,
+        userId: selectedUser ? selectedUser.value : null,
+      });
+    }
+  };
+
+  const handleClear = () => {
+    setSelectedUser("");
+    assignMutation.mutate({
+      projectId: selectedProject.id,
+      taskId: taskId,
+      userId: null,
+    });
+  };
+
+  const handleSelectChange = (selectedOption) => {
+    if (selectedOption) {
+      setSelectedUser(selectedOption);
     } else {
-      alert("No user selected or available for assignment!");
+      setSelectedUser(null);
     }
   };
 
   return (
     <div className="flex flex-row text-base md:text-lg space-x-2">
       <Select
-        options={userOptions}
-        onChange={setSelectedUser}
+        options={options}
+        onChange={handleSelectChange}
         value={selectedUser}
-        placeholder="User"
-        getOptionValue={(option) => option.value}
-        getOptionLabel={(option) => option.label}
+        placeholder="Select User"
+        isLoading={loadingUsers}
+        isDisabled={loadingUsers || usersError}
       />
-      <button onClick={handleAssign} disabled={!selectedUser}>
+      <button
+        className="hover:bg-stone-400 rounded-md font-semibold px-4 py-2 focus:bg-stone-800 text-stone-800 focus:text-stone-50"
+        onClick={handleAssign}
+        disabled={usersError || assignMutation.isLoading}
+      >
         Assign
+      </button>
+      {assignMutation.isLoading && <span>Assigning...</span>}
+      {usersError && (
+        <span className="text-red-500">{errorDetails?.message}</span>
+      )}
+      <button
+        className="px-4 py-2 hover:bg-red-700 rounded-md"
+        onClick={handleClear}
+      >
+        Clear
       </button>
     </div>
   );
 };
 
 export default TaskAssignment;
-
-// import { useProject } from "../contexts/ProjectProvider";
-// import Select from "react-select";
-// import { useState, useEffect } from "react";
-
-// const TaskAssignment = ({ taskId }) => {
-//   const { handleAssignTask, getEligibleUsersForTask } = useProject();
-//   const [selectedUser, setSelectedUser] = useState(null);
-//   const [usersOptions, setUsersOptions] = useState([]);
-
-//   useEffect(() => {
-//     const users = getEligibleUsersForTasks(task.id);
-//     const options = users.map((user) => ({
-//       value: user.id,
-//       label: user.username,
-//     }));
-//     setUsersOptions(options);
-//     setSelectedUser(options.length > 0 ? options[0] : null); // Select first user by default
-//   }, [taskId, getEligibleUsersForTask]);
-
-//   const handleAssign = () => {
-//     if (selectedUser) {
-//       handleAssignTask(taskId, selectedUser.value);
-//       alert("Task assigned successfully!");
-//     } else {
-//       alert("No user selected or available for assignment!");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <Select
-//         options={usersOptions}
-//         onChange={setSelectedUser}
-//         value={selectedUser}
-//         placeholder="Select User to Assign"
-//       />
-//       <button onClick={handleAssign} disabled={!selectedUser}>
-//         Assign Task
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default TaskAssignment;

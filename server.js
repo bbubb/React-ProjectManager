@@ -1,79 +1,110 @@
-import jsonServer from 'json-server';
+import jsonServer from "json-server";
 
 const server = jsonServer.create();
-const router = jsonServer.router('db.json'); // Path to JSON file
+const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
 
 server.use(middlewares);
 server.use(jsonServer.bodyParser);
 
-// Custom middleware to handle complex logic
 server.use((req, res, next) => {
-    const db = router.db; // Get lowdb instance
+  const db = router.db;
+  const { method, path } = req;
 
-    // Fetch eligible users for a project, excluding those already assigned specific roles
-    if (req.method === 'GET' && req.path.includes('/projects/') && req.path.includes('/eligible-users')) {
-        const projectId = parseInt(req.path.split('/')[2]); // Extract project ID from URL
-        const project = db.get('projects').find({ id: projectId }).value();
-        if (project) {
-            const allUsers = db.get('users').value();
-            const assignedUserIds = Object.values(project.access).flat();
-            const eligibleUsers = allUsers.filter(user => !assignedUserIds.includes(user.id));
-            res.json(eligibleUsers);
-        } else {
-            res.status(404).send('Project not found');
-        }
+  console.log(`General Middleware Check: ${req.method} ${req.url}`);
+  console.log(`Incoming request: ${req.method} ${req.path}`);
+  console.log(`Path segments:`, req.path.split("/"));
+
+  // Assigning tasks to users
+  if (
+    method === "PUT" &&
+    /\/projects\/(\d+)\/tasks\/(\d+)\/assign/.test(path)
+  ) {
+    const [, projectId, taskId] = path.match(
+      /\/projects\/(\d+)\/tasks\/(\d+)\/assign/
+    );
+    const userId = req.body.userId ? parseInt(req.body.userId) : null;
+    const project = db
+      .get("projects")
+      .find({ id: Number(projectId) })
+      .value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
     }
 
-    // Fetch eligible users for a task, excluding the current assignee
-    else if (req.method === 'GET' && req.path.includes('/tasks/') && req.path.includes('/eligible-users')) {
-        const taskId = parseInt(req.path.split('/')[2]); // Extract task ID from URL
-        const task = db.get('tasks').find({ id: taskId }).value();
-        if (task) {
-            const allUsers = db.get('users').value();
-            const eligibleUsers = allUsers.filter(user => user.id !== task.assignee.userId);
-            res.json(eligibleUsers);
-        } else {
-            res.status(404).send('Task not found');
-        }
+    const taskIndex = project.tasks.findIndex((t) => t.id === Number(taskId));
+    if (taskIndex === -1) {
+      res.status(404).json({ error: "Task not found" });
+      return;
     }
 
-    // Add or remove users to/from a project's role
-    else if (req.method === 'POST' && req.path.includes('/projects/') && req.path.includes('/access/') || req.method === 'DELETE' && req.path.includes('/projects/') && req.path.includes('/access/')) {
-        const projectId = parseInt(req.path.split('/')[2]); // Extract project ID from URL
-        const project = db.get('projects').find({ id: projectId }).value();
-        if (!project) {
-            res.status(404).send('Project not found');
-            return;
-        }
+    project.tasks[taskIndex].assignee = userId
+      ? { userId: Number(userId) }
+      : { userId: null };
+    db.get("projects")
+      .find({ id: Number(projectId) })
+      .assign({ tasks: project.tasks })
+      .write();
+    res.json({ message: "Task assigned successfully", project });
+    return;
+  }
 
-        if (req.method === 'POST') {
-            const role = req.body.role; // Role should be passed in the body
-            const userId = req.body.userId; // User ID should be passed in the body
-            if (!project.access[role]) {
-                project.access[role] = [];
-            }
-            if (!project.access[role].includes(userId)) {
-                project.access[role].push(userId);
-                db.get('projects').find({ id: projectId }).assign({ access: project.access }).write();
-                res.status(200).json(project);
-            } else {
-                res.status(400).send('User already added to this role');
-            }
-        } else if (req.method === 'DELETE') {
-            const role = req.path.split('/')[4]; // Role should be extracted from URL
-            const userId = parseInt(req.path.split('/')[5]); // User ID should be extracted from URL
-            project.access[role] = project.access[role].filter(id => id !== userId);
-            db.get('projects').find({ id: projectId }).assign({ access: project.access }).write();
-            res.sendStatus(204);
-        }
+  if (method === "GET" && path.includes("/projects-by-user/")) {
+    const userId = parseInt(req.path.split("/")[2]);
+    console.log(`Fetching projects for user ID: ${userId}`);
+    const projects = db.get("projects").value();
+    const accessibleProjects = projects.filter((project) =>
+      Object.values(project.access).some((role) => role.includes(userId))
+    );
+    console.log(`Accessible projects: ${JSON.stringify(accessibleProjects)}`);
+    if (accessibleProjects.length > 0) {
+      res.json(accessibleProjects);
     } else {
-        next();
+      res.status(404).json({ error: "No projects found for this user" });
     }
+    return;
+  }
+
+  if (
+    method === "GET" &&
+    path.match(/\/projects\/\d+\/tasks\/\d+\/eligible-users/)
+  ) {
+    const projectId = parseInt(path.split("/")[2], 10);
+    const taskId = parseInt(path.split("/")[4], 10);
+    const project = db.get("projects").find({ id: projectId }).value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const task = project.tasks.find((t) => t.id === taskId);
+    if (!task) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    const allUsers = db.get("users").value();
+    const projectUsers = Object.values(project.access).flat();
+
+    let eligibleUsers = allUsers.filter((user) =>
+      projectUsers.includes(user.id)
+    );
+    console.log(
+      `Eligible users: ${JSON.stringify(
+        eligibleUsers
+      )} and assignee: ${JSON.stringify(task.assignee)}`
+    );
+    res.json({ eligibleUsers, assignee: task.assignee });
+    return;
+  }
+
+  console.log(`Final catch-all middleware: ${req.method} ${req.path}`);
+  next();
 });
 
-// This is to ensure all GET, POST, PUT, DELETE requests not caught by the custom middleware
-// are still processed by JSON Server default routes.
 server.use(router);
 
 const port = 3001;

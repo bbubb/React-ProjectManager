@@ -1,3 +1,4 @@
+// AuthProvider
 import React, { createContext, useContext } from "react";
 import { useMutation, useQueryClient } from 'react-query';
 import authenticateUser from "../services/AuthService";
@@ -26,6 +27,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const user = queryClient.getQueryData('user');
+  console.log('User:', user);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, error, signIn, signOut }}>
