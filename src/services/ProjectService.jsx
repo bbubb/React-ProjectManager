@@ -25,40 +25,60 @@ export const useFetchProjectsByUserRole = (userId) =>
     },
   });
 
-export const useAddProject = () =>
-  useMutation((data) => post("/projects", data), {
-    onError: (error) => console.error("Error adding project:", error),
+export const useSaveProject = () =>
+  useMutation(
+    (project) => {
+      const { projectId, ...projectData } = project;
+      return id
+        ? put(`/projects/${projectId}`, projectData)
+        : post("/projects", projectData);
+    },
+    {
+      onError: (error, variables) => {
+        const action = variables.projectId ? "updating" : "creating";
+        console.error(`Error ${action} project:`, error);
+      },
+      onSuccess: (data, variables) => {
+        const action = variables.projectId ? "updated" : "created";
+        console.log(`Project ${action} successfully:`, data);
+      },
+    }
+  );
+
+export const useDeleteProject = () =>
+  useMutation((projectId) => del(`/projects/${projectId}`), {
+    onError: (error, variables) => {
+      console.error(`Error deleting project ${projectId}:`, error);
+    },
+    onSuccess: (data, variables) => {
+      console.log(`Project deleted successfully:`, data);
+    },
   });
 
-export const useUpdateProject = (projectId, data) =>
-  useMutation(() => put(`/projects/${projectId}`, data), {
-    onError: (error) =>
-      console.error("Error updating project ${projectId}:", error),
-  });
+export const useAddUserToProject = () =>
+  useMutation(
+    ({ projectId, userId, role }) =>
+      post(`/projects/${projectId}/access/${role}`, { userId }),
+    {
+      onError: (error, { projectId, userId, role }) =>
+        console.error(
+          `Error adding user ${userId} with role ${role} to project ${projectId}:`,
+          error
+        ),
+    }
+  );
 
-export const useDeleteProject = (projectId) =>
-  useMutation(() => del(`/projects/${projectId}`), {
-    onError: (error) =>
-      console.error("Error deleting project ${projectId}:", error),
-  });
-
-export const useAddUserToProject = (projectId, userId, role) =>
-  useMutation(() => post(`/projects/${projectId}/access/${role}`, { userId }), {
-    onError: (error) =>
-      console.error(
-        "Error adding user ${userId} with role ${role} to project ${projectId}:",
-        error
-      ),
-  });
-
-export const useRemoveUserFromProject = (projectId, userId, role) =>
-  useMutation(() => del(`/projects/${projectId}/access/${role}/${userId}`), {
-    onError: (error) =>
-      console.error(
-        "Error removing user ${userId} with role ${role} from project ${projectId}:",
-        error
-      ),
-  });
+export const useRemoveUserFromProject = () =>
+  useMutation(
+    ({ projectId, userId }) => del(`/projects/${projectId}/access/${userId}`),
+    {
+      onError: (error, { projectId, userId }) =>
+        console.error(
+          `Error removing user ${userId} from project ${projectId}:`,
+          error
+        ),
+    }
+  );
 
 export const useAddTaskToProject = (projectId, taskData) =>
   useMutation(() => post(`/projects/${projectId}/tasks`, taskData), {
@@ -70,24 +90,23 @@ export const useRemoveTaskFromProject = (projectId, taskId) =>
   useMutation(() => del(`/projects/${projectId}/tasks/${taskId}`), {
     onError: (error) =>
       console.error(
-        "Error removing task ${taskId} from project ${projectId}:",
+        `Error removing task ${taskId} from project ${projectId}:`,
         error
       ),
   });
 
-  export const useAssignTaskToUser = () => {
-    return useMutation(({ projectId, taskId, userId }) =>
+export const useAssignTaskToUser = () => {
+  return useMutation(
+    ({ projectId, taskId, userId }) =>
       put(`/projects/${projectId}/tasks/${taskId}/assign`, { userId: userId }),
-      {
-        onError: (error) =>
-          console.error(
-            `Error assigning task to user in project: ${error}`
-          ),
-        onSuccess: (data) =>
-          console.log(`Task assignment successful: ${data.message}`)
-      }
-    );
-  };  
+    {
+      onError: (error) =>
+        console.error(`Error assigning task to user in project: ${error}`),
+      onSuccess: (data) =>
+        console.log(`Task assignment successful: ${data.message}`),
+    }
+  );
+};
 
 export const useRemoveTaskUserAssignment = (projectId, taskId) =>
   useMutation(
@@ -95,7 +114,7 @@ export const useRemoveTaskUserAssignment = (projectId, taskId) =>
     {
       onError: (error) =>
         console.error(
-          "Error removing task ${taskId} assignment in project ${projectId}:",
+          `Error removing task ${taskId} assignment in project ${projectId}:`,
           error
         ),
     }

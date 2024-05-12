@@ -1,7 +1,22 @@
 import { useProject } from "../contexts/ProjectProvider";
+import { useDeleteProject } from "../services/ProjectService";
 
 const ProjectDetails = ({ selectedProject }) => {
-  const { handleEditProject, handleRemoveProject } = useProject();
+  const { handleShowProjectInput } = useProject();
+  const {
+    mutate: deleteProject,
+    isLoading: deletingProject,
+    isError: deleteError,
+    error: deleteErrorDetails,
+   } = useDeleteProject();
+
+  const handleEditProject = () => {
+    handleShowProjectInput(true);
+  };
+
+  const handleRemoveProject = () => {
+    deleteProject(selectedProject.id);
+  };
 
   return (
     <>

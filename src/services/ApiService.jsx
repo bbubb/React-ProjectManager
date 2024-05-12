@@ -8,7 +8,6 @@ export const fetchApi = async (url, options = {}) => {
       headers: {
         ...options.headers,
         "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
       },
     });
     if (!response.ok) {

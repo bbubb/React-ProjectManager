@@ -15,6 +15,45 @@ server.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.path}`);
   console.log(`Path segments:`, req.path.split("/"));
 
+  // Fetching users by project
+  if (method === "GET" && path.match(/\/projects\/\d+\/users/)) {
+    const projectId = parseInt(path.split("/")[2], 10);
+    const project = db.get("projects").find({ id: projectId }).value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const allUsers = db.get("users").value();
+    const projectUsers = Object.values(project.access).flat();
+
+    let allProjectUsers = allUsers.filter((user) =>
+      projectUsers.includes(user.id)
+    );
+    res.json({ allProjectUsers });
+    return;
+  }
+
+  // Adding a new user
+  if (method === "POST" && path === "/users") {
+    const { username } = req.body;
+    if (!username) {
+      res.status(400).json({ error: "Username is required" });
+      return;
+    }
+
+    const user = db.get("users").find({ username }).value();
+    if (user) {
+      res.status(400).json({ error: "Username already exists" });
+      return;
+    }
+
+    const newUser = db.get("users").insert({ username }).write();
+    res.json({ message: "User added successfully", user: newUser });
+    return;
+  }
+
   // Assigning tasks to users
   if (
     method === "PUT" &&
@@ -51,6 +90,7 @@ server.use((req, res, next) => {
     return;
   }
 
+  // Removing task assignment
   if (method === "GET" && path.includes("/projects-by-user/")) {
     const userId = parseInt(req.path.split("/")[2]);
     console.log(`Fetching projects for user ID: ${userId}`);
@@ -67,6 +107,7 @@ server.use((req, res, next) => {
     return;
   }
 
+  // Fetching eligible users for a task
   if (
     method === "GET" &&
     path.match(/\/projects\/\d+\/tasks\/\d+\/eligible-users/)
@@ -100,6 +141,96 @@ server.use((req, res, next) => {
     res.json({ eligibleUsers, assignee: task.assignee });
     return;
   }
+
+  // Fetching eligible users for a project
+  if (method === "GET" && path.match(/\/projects\/\d+\/eligible-users/)) {
+    const projectId = parseInt(path.split("/")[2], 10);
+    const project = db.get("projects").find({ id: projectId }).value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const allUsers = db.get("users").value();
+    const projectUsers = Object.values(project.access).flat();
+
+    let eligibleUsers = allUsers.filter(
+      (user) => !projectUsers.includes(user.id)
+    );
+    console.log(`Eligible users: ${JSON.stringify(eligibleUsers)}`);
+    res.json({ eligibleUsers });
+    return;
+  }
+
+  // Adding a user to a project
+  if (method === "POST" && path.match(/^\/projects\/(\d+)\/access\/(\w+)$/)) {
+    const projectId = parseInt(path.split("/")[2], 10);
+    const role = path.split("/")[4];
+    const userId = parseInt(req.body.userId);
+    const project = db.get("projects").find({ id: projectId }).value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(400).json({ error: "User ID is required" });
+      return;
+    }
+
+    if (!project.access[role]) {
+      res.status(400).json({ error: "Role does not exist" });
+      return;
+    }
+
+    if (project.access[role].includes(userId)) {
+      res.status(400).json({ error: "User already has access" });
+      return;
+    }
+
+    project.access[role].push(userId);
+    db.get("projects")
+      .find({ id: projectId })
+      .assign({ access: project.access })
+      .write();
+    console.log(`User added to project: ${JSON.stringify(project)}`);
+    res.json({ message: "User added successfully", project });
+    return;
+  }
+
+// Removing a user from a project access
+if (method === "DELETE" && path.match(/^\/projects\/(\d+)\/access\/(\d+)$/)) {
+  const projectId = parseInt(path.split("/")[2], 10);
+  const userId = parseInt(path.split("/")[4], 10);
+  const project = db.get("projects").find({ id: projectId }).value();
+
+  if (!project) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+
+  let found = false; // Flag to check if the user was found in any role
+  Object.keys(project.access).forEach(role => {
+    if (project.access[role].includes(userId)) {
+      project.access[role] = project.access[role].filter(id => id !== userId);
+      found = true;
+    }
+  });
+
+  if (!found) {
+    res.status(400).json({ error: "User does not have access to this project" });
+    return;
+  }
+
+  db.get("projects")
+    .find({ id: projectId })
+    .assign({ access: project.access })
+    .write();
+  res.json({ message: "User removed successfully from all roles", project });
+  return;
+}
 
   console.log(`Final catch-all middleware: ${req.method} ${req.path}`);
   next();

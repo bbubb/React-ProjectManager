@@ -129,6 +129,11 @@
       "id": 3,
       "username": "UserThree",
       "password": "passwordThree"
+    },
+    {
+      "id": 4,
+      "username": "UserFour",
+      "password": "passwordFour"
     }
   ]
 }

@@ -1,7 +1,13 @@
 import { useProject } from "../contexts/ProjectProvider";
 
 const ButtonSidebar = ({ message }) => {
-    const { handleNewProject } = useProject();
+    const { handleShowProjectInput, handleSelectProject } = useProject();
+
+    const handleNewProject = () => {
+      const projectId = null;
+      handleSelectProject(projectId);
+      handleShowProjectInput(true);
+    };
 
   return (
     <button
