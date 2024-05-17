@@ -61,7 +61,7 @@
           "id": 3,
           "description": "Initial task for Project 2",
           "assignee": {
-            "userId": 3
+            "userId": 1
           }
         },
         {
@@ -112,6 +112,20 @@
           }
         }
       ]
+    },
+    {
+      "name": "Test Project 4",
+      "description": "ed1 ed2",
+      "date": "",
+      "access": {
+        "admin": [
+          1
+        ],
+        "editor": [],
+        "reader": []
+      },
+      "tasks": [],
+      "id": 4
     }
   ],
   "users": [

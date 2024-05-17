@@ -8,10 +8,10 @@ export const useFetchUsers = () => {
   });
 };
 
-export const useFetchProjectEligibleUsers = (projectId) => {
+export const useFetchProjectEligibleUsers = (projectId, searchQuery) => {
   return useQuery(
-    ["project-eligible-users", projectId],
-    () => get(`/projects/${projectId}/eligible-users`),
+    ["project-eligible-users", projectId, searchQuery],
+    () => get(`/users/search?projectId=${projectId}&query=${searchQuery}`),
     {
       enabled: !!projectId,
       onError: (error) => {

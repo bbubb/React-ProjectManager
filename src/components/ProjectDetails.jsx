@@ -1,21 +1,38 @@
 import { useProject } from "../contexts/ProjectProvider";
 import { useDeleteProject } from "../services/ProjectService";
+import { useState } from "react";
+import ConfirmationModal from "./ConfirmationModal";
 
 const ProjectDetails = ({ selectedProject }) => {
-  const { handleShowProjectInput } = useProject();
+  console.log("ProjectDetails selectedProject:", selectedProject);
+  const { handleShowProjectInput, handleSelectProject, refreshProjects } = useProject();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const {
     mutate: deleteProject,
     isLoading: deletingProject,
     isError: deleteError,
     error: deleteErrorDetails,
-   } = useDeleteProject();
+  } = useDeleteProject();
+
+
 
   const handleEditProject = () => {
     handleShowProjectInput(true);
   };
 
   const handleRemoveProject = () => {
-    deleteProject(selectedProject.id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteProject = () => {
+    deleteProject(selectedProject.id, {
+      onSuccess: () => {
+        refreshProjects();
+        handleSelectProject(null);
+        handleShowProjectInput(false);
+      },
+    });
+    setShowDeleteModal(false);
   };
 
   return (
@@ -39,6 +56,7 @@ const ProjectDetails = ({ selectedProject }) => {
           >
             Edit
           </button>
+
           <button
             className="px-4 py-2  hover:bg-red-700 rounded-md"
             onClick={handleRemoveProject}
@@ -47,6 +65,13 @@ const ProjectDetails = ({ selectedProject }) => {
           </button>
         </>
       </div>
+      <ConfirmationModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteProject}
+        title="Delete Project"
+        message="Are you sure you want to delete this project?"
+      />
     </>
   );
 };

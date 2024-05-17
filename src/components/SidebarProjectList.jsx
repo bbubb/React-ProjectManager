@@ -11,7 +11,7 @@ const SidebarProjectList = ({ projects = [] }) => {
         {projects.map((project, index) => (
           <li key={index} className="flex justify-center items-center my-4 mx-2">
             <button
-              onClick={() => handleSelectProject(project.id)}
+              onClick={() => handleSelectProject(project)}
               className="rounded-md text-stone-400 focus:bg-stone-300 focus:text-stone-800 hover:text-stone-100 px-4 py-2 min-w-xs font-bold"
             >
               {project.name}

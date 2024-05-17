@@ -4,46 +4,51 @@ import { get, post, put, del } from "./ApiService";
 
 export const useFetchProjects = () =>
   useQuery("projects", () => get("/projects"), {
-    onError: (error) => console.error("Error fetching all projects:", error),
+    onError: (error) => console.error(`Error fetching all projects:`, error),
   });
 
 export const useFetchProjectById = (projectId) =>
   useQuery(["project", projectId], () => get(`/projects/${projectId}`), {
     enabled: !!projectId,
     onError: (error) =>
-      console.error("Error fetching project b y ID ${projectId}:", error),
+      console.error(`Error fetching project b y ID ${projectId}:`, error),
   });
 
 export const useFetchProjectsByUserRole = (userId) =>
-  useQuery(["projects", userId], () => get(`/projects-by-user/${userId}`), {
-    enabled: !!userId,
-    onError: (error) => {
-      console.error("Error fetching projects for user ${userId}:", error);
-    },
-    onSuccess: (data) => {
-      console.log("Fetched projects for user ${userId}:", data);
-    },
-  });
-
-export const useSaveProject = () =>
-  useMutation(
-    (project) => {
-      const { projectId, ...projectData } = project;
-      return id
-        ? put(`/projects/${projectId}`, projectData)
-        : post("/projects", projectData);
-    },
+  useQuery(
+    ["projects-by-user", userId],
+    () => get(`/projects-by-user/${userId}`),
     {
-      onError: (error, variables) => {
-        const action = variables.projectId ? "updating" : "creating";
-        console.error(`Error ${action} project:`, error);
+      enabled: !!userId,
+      onError: (error) => {
+        console.error(`Error fetching projects for user ${userId}:`, error);
       },
-      onSuccess: (data, variables) => {
-        const action = variables.projectId ? "updated" : "created";
-        console.log(`Project ${action} successfully:`, data);
+      onSuccess: (data) => {
+        console.log(`Fetched projects for user ${userId}:`, data);
       },
     }
   );
+
+export const useSaveProject = () =>
+  useMutation((projectPayload) => {
+    const { projectId, name, description, date, userChanges, globalUserId } =
+      projectPayload;
+
+    return projectId
+      ? put(`/projects/${projectId}`, {
+          name,
+          description,
+          date,
+          userChanges,
+        })
+      : post("/projects", {
+          name,
+          description,
+          date,
+          userChanges,
+          globalUserId,
+        });
+  });
 
 export const useDeleteProject = () =>
   useMutation((projectId) => del(`/projects/${projectId}`), {
@@ -83,7 +88,7 @@ export const useRemoveUserFromProject = () =>
 export const useAddTaskToProject = (projectId, taskData) =>
   useMutation(() => post(`/projects/${projectId}/tasks`, taskData), {
     onError: (error) =>
-      console.error("Error adding task to project ${projectId}:", error),
+      console.error(`Error adding task to project ${projectId}:`, error),
   });
 
 export const useRemoveTaskFromProject = (projectId, taskId) =>
