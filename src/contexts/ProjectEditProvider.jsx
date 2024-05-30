@@ -6,7 +6,6 @@ import {
   useCallback,
 } from "react";
 import { useAuth } from "./AuthProvider";
-import { useQueryClient } from "react-query";
 import { useProject } from "./ProjectProvider";
 import {
   useFetchProjectEligibleUsers,
@@ -19,7 +18,7 @@ const ProjectEditContext = createContext();
 const ProjectEditProvider = ({ children }) => {
   const { user } = useAuth();
   const globalUser = user || {};
-  const { selectedProject, handleShowProjectInput, refreshProjects, handleSelectProject } =
+  const { selectedProject, handleShowProjectInput, refetchProjects, handleSelectProject } =
     useProject();
   const [projectDetails, setProjectDetails] = useState({
     name: "",
@@ -31,7 +30,6 @@ const ProjectEditProvider = ({ children }) => {
     addedUsers: [],
     removedUsers: [],
   });
-  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
 
   const {
@@ -102,16 +100,16 @@ const ProjectEditProvider = ({ children }) => {
     };
 
     saveProject(projectPayload, {
-      onError: (error, variables) => {
+      onError: (error) => {
         console.error("Error saving project:", error);
       },
       onSuccess: (data) => {
         console.log("Project saved successfully:", data);
-        refreshProjects();
+        refetchProjects();
         handleShowProjectInput(false);
         console.log("Selected Project:", selectedProject);
         console.log("Data project selected:", data.project.id);
-        handleSelectProject(data.project);
+        handleSelectProject(data.project.id);
       },
     });
   }, [
@@ -120,9 +118,9 @@ const ProjectEditProvider = ({ children }) => {
     selectedProject,
     saveProject,
     globalUser,
-    refreshProjects,
     handleShowProjectInput,
     handleSelectProject,
+    refetchProjects,
   ]);
 
   const handleCancelProject = useCallback(() => {

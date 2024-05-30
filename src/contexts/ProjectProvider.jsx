@@ -14,6 +14,7 @@ export const ProjectProvider = ({ children }) => {
   const queryClient = useQueryClient();
   const {
     data: projects,
+    refetch: refetchProjects,
     isLoading: loadingProjects,
     isError,
     error,
@@ -21,25 +22,14 @@ export const ProjectProvider = ({ children }) => {
 
   const permissions = usePermission(selectedProject?.id);
 
-  // Automatically select the first project when projects are loaded
-  // useEffect(() => {
-  //   if (projects && projects.length > && !selectedProject) {
-  //     setSelectedProject(projects[0]);
-  //   }
-  // }, [projects, selectedProject]);
-
-  const handleSelectProject = (project) => {
-    // const project = projects.find((p) => p.id === projectId);
-    console.log("ProjectProvider handleSelectProject project:", project);
+  const handleSelectProject = (projectId) => {
+    const project = projects.find((p) => p.id === projectId);
+    console.log("ProjectProvider handleSelectProject project:", project, " projectId:", projectId);
     setSelectedProject(project);
     handleShowProjectInput(false);
   };
 
   const handleShowProjectInput = (show) => setShowProjectInput(show);
-
-  const refreshProjects = () => {
-    queryClient.invalidateQueries("projects-by-user", user.id);
-  }
 
   const value = {
     projects,
@@ -53,7 +43,7 @@ export const ProjectProvider = ({ children }) => {
     projectPermissions,
     isError,
     error,
-    refreshProjects,
+    refetchProjects,
   };
 
   return (

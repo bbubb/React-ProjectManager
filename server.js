@@ -297,8 +297,10 @@ server.use((req, res, next) => {
         description,
         date,
         access: {
-          ...access, 
-          admin: access.admin ? [...access.admin, globalUserId] : [globalUserId],
+          ...access,
+          admin: access.admin
+            ? [...access.admin, globalUserId]
+            : [globalUserId],
         },
         tasks: [],
       })
@@ -354,6 +356,80 @@ server.use((req, res, next) => {
     db.get("projects").find({ id: projectId }).assign(project).write();
 
     res.json({ message: "Project updated successfully", project });
+    return;
+  }
+
+  // DELETE remove a project
+  if (method === "DELETE" && path.match(/^\/projects\/\d+$/)) {
+    const projectId = parseInt(path.split("/")[2], 10);
+    const project = db.get("projects").find({ id: projectId }).value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    db.get("projects").remove({ id: projectId }).write();
+    res.json({ message: "Project removed successfully" });
+    return;
+  }
+
+  // POST Adding a task to a project
+  if (method === "POST" && path.match(/^\/projects\/\d+\/tasks$/)) {
+    const projectId = parseInt(path.split("/")[2], 10);
+    const { description } = req.body;
+
+    const project = db.get("projects").find({ id: projectId }).value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    console.log(
+      `Adding task to project: ${projectId} with description: ${description}`
+    );
+    const newTask = db
+      .get("projects")
+      .find({ id: projectId })
+      .get("tasks")
+      .insert({
+        description,
+        assignee: {
+          userId: null,
+        },
+      })
+      .write();
+
+    res.status(201).json({ message: "Task added successfully", task: newTask });
+    return;
+  }
+
+  // DELETE Removing a task from a project
+  if (method === "DELETE" && path.match(/^\/projects\/\d+\/tasks\/\d+$/)) {
+    const [, projectId, taskId] = path.match(/\/projects\/(\d+)\/tasks\/(\d+)/);
+    const project = db
+      .get("projects")
+      .find({ id: Number(projectId) })
+      .value();
+
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const taskIndex = project.tasks.findIndex((t) => t.id === Number(taskId));
+    if (taskIndex === -1) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    project.tasks.splice(taskIndex, 1);
+    db.get("projects")
+      .find({ id: Number(projectId) })
+      .assign({ tasks: project.tasks })
+      .write();
+    res.json({ message: "Task removed successfully", project });
     return;
   }
 

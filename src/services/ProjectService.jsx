@@ -52,11 +52,8 @@ export const useSaveProject = () =>
 
 export const useDeleteProject = () =>
   useMutation((projectId) => del(`/projects/${projectId}`), {
-    onError: (error, variables) => {
+    onError: (error) => {
       console.error(`Error deleting project ${projectId}:`, error);
-    },
-    onSuccess: (data, variables) => {
-      console.log(`Project deleted successfully:`, data);
     },
   });
 
@@ -85,20 +82,29 @@ export const useRemoveUserFromProject = () =>
     }
   );
 
-export const useAddTaskToProject = (projectId, taskData) =>
-  useMutation(() => post(`/projects/${projectId}/tasks`, taskData), {
-    onError: (error) =>
-      console.error(`Error adding task to project ${projectId}:`, error),
-  });
+export const useAddTaskToProject = () => {
+  return useMutation(
+    ({ projectId, taskDescription }) =>
+      post(`/projects/${projectId}/tasks`, { description: taskDescription }),
+    {
+      onError: (error) =>
+        console.error(`Error adding task to project ${projectId}:`, error),
+    }
+  );
+};
 
-export const useRemoveTaskFromProject = (projectId, taskId) =>
-  useMutation(() => del(`/projects/${projectId}/tasks/${taskId}`), {
-    onError: (error) =>
-      console.error(
-        `Error removing task ${taskId} from project ${projectId}:`,
-        error
-      ),
-  });
+export const useRemoveTaskFromProject = () => {
+  return useMutation(
+    ({ projectId, taskId }) => del(`/projects/${projectId}/tasks/${taskId}`),
+    {
+      onError: (error) =>
+        console.error(
+          `Error removing task ${taskId} from project ${projectId}:`,
+          error
+        ),
+    }
+  );
+};
 
 export const useAssignTaskToUser = () => {
   return useMutation(
