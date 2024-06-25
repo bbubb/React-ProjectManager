@@ -1,24 +1,23 @@
 import { useRef } from "react";
-import { useProject } from "../contexts/ProjectProvider";
 
-const TaskInput = () => {
-  const { selectedProject } = useProject();
+const TaskInput = ({ onAddTask }) => {
   const inputRef = useRef();
 
-  function handleAddTaskEvent() {
+  const handleAddTaskEvent = () => {
     const newTaskDescription = inputRef.current.value;
     if (newTaskDescription) {
-      handleAddTask(selectedProject.id, newTaskDescription);
+      onAddTask(newTaskDescription);
       inputRef.current.value = ""; // clear input field after adding task
     }
-  }
+  };
 
-  if (!selectedProject) return null;
+  // if (!selectedProject) return null;
 
   return (
     <div className=" w-3/4 max-w-4x1 bg-cyan-300">
       <h2 className="text-2xl md:text-3xl text-stone-600 font-extrabold pb-2">
-        Tasks for {selectedProject.name}
+        Tasks 
+        {/* for {selectedProject.name} */}
       </h2>
       <div className="flex justify-start w-2/5 text-xl md:text-2xl">
         <input
