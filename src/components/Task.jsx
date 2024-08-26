@@ -8,7 +8,7 @@ import {
 } from "../services/ProjectService";
 
 const Task = () => {
-  const { selectedProject, refetchProjects } = useProject();
+  const { selectedProject, refetchProjects, handleSelectProject } = useProject();
   const queryClient = useQueryClient();
   const { mutate: addTask } = useAddTaskToProject();
   const { mutate: removeTask } = useRemoveTaskFromProject();
@@ -19,8 +19,10 @@ const Task = () => {
       { projectId: selectedProject.id, taskDescription },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries(["project", selectedProject.id]);
           refetchProjects();
-          queryClient.invalidateQueries(["project", selectedProject.id])
+          handleSelectProject(selectedProject.id);
+          console.log("Task added to project:", selectedProject.id);
         },
       }
     );
@@ -31,8 +33,10 @@ const Task = () => {
       { projectId: selectedProject.id, taskId },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries(["project", selectedProject.id]);
           refetchProjects();
-          queryClient.invalidateQueries(["project", selectedProject.id])
+          handleSelectProject(selectedProject.id);
+          console.log("Task removed from project:", selectedProject.id);
         },
       }
     );

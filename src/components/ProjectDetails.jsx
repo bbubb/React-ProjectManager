@@ -5,7 +5,7 @@ import ConfirmationModal from "./ConfirmationModal";
 
 const ProjectDetails = ({ selectedProject }) => {
   console.log("ProjectDetails selectedProject:", selectedProject);
-  const { handleShowProjectInput, handleSelectProject, refreshProjects } = useProject();
+  const { handleShowProjectInput, handleSelectProject, refetchProjects } = useProject();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const {
     mutate: deleteProject,
@@ -27,7 +27,7 @@ const ProjectDetails = ({ selectedProject }) => {
   const confirmDeleteProject = () => {
     deleteProject(selectedProject.id, {
       onSuccess: () => {
-        refreshProjects();
+        refetchProjects();
         handleSelectProject(null);
         handleShowProjectInput(false);
       },

@@ -108,8 +108,8 @@ const ProjectEditProvider = ({ children }) => {
         refetchProjects();
         handleShowProjectInput(false);
         console.log("Selected Project:", selectedProject);
-        console.log("Data project selected:", data.project.id);
         handleSelectProject(data.project.id);
+        console.log("Data project selected:", data.project.id);
       },
     });
   }, [

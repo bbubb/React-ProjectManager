@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import * as ProjectService from "../services/ProjectService";
 import { usePermission } from "../services/PermissionService";
 import { useAuth } from "./AuthProvider";
@@ -22,9 +22,21 @@ export const ProjectProvider = ({ children }) => {
 
   const permissions = usePermission(selectedProject?.id);
 
+  useEffect(() => {
+    if (projects && selectedProject) {
+      const updatedProject = projects.find((p) => p.id === selectedProject.id);
+      setSelectedProject(updatedProject);
+    }
+  }, [projects]);
+
   const handleSelectProject = (projectId) => {
     const project = projects.find((p) => p.id === projectId);
-    console.log("ProjectProvider handleSelectProject project:", project, " projectId:", projectId);
+    console.log(
+      "ProjectProvider handleSelectProject project:",
+      project,
+      " projectId:",
+      projectId
+    );
     setSelectedProject(project);
     handleShowProjectInput(false);
   };
