@@ -3,7 +3,7 @@
     {
       "id": 1,
       "name": "Project 1",
-      "description": "A sample project.",
+      "description": "A sample project. ",
       "date": "2023-04-01",
       "access": {
         "admin": [
@@ -112,44 +112,6 @@
           }
         }
       ]
-    },
-    {
-      "name": "Test 5",
-      "description": "Test\n",
-      "date": "",
-      "access": {
-        "admin": [
-          1
-        ],
-        "editor": [],
-        "reader": []
-      },
-      "tasks": [],
-      "id": 4
-    },
-    {
-      "name": "Test 6",
-      "description": "tests",
-      "date": "2024-05-30",
-      "access": {
-        "admin": [
-          1
-        ],
-        "editor": [
-          2
-        ],
-        "reader": []
-      },
-      "tasks": [
-        {
-          "description": "Test ",
-          "assignee": {
-            "userId": null
-          },
-          "id": 1
-        }
-      ],
-      "id": 5
     }
   ],
   "users": [

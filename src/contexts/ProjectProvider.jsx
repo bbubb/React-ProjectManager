@@ -11,6 +11,7 @@ export const ProjectProvider = ({ children }) => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [showProjectInput, setShowProjectInput] = useState(false);
   const [projectPermissions, setProjectPermissions] = useState({});
+  const [previousProjectsIds, setPreviousProjectsIds] = useState([]);
   const queryClient = useQueryClient();
   const {
     data: projects,
@@ -23,9 +24,15 @@ export const ProjectProvider = ({ children }) => {
   const permissions = usePermission(selectedProject?.id);
 
   useEffect(() => {
-    if (projects && selectedProject) {
-      const updatedProject = projects.find((p) => p.id === selectedProject.id);
+    if (projects) {
+      let updatedProject;
+      if (selectedProject) {
+        updatedProject = projects.find((p) => p.id === selectedProject.id);
+      } else {
+        updatedProject = projects.find((p) => !previousProjectsIds.includes(p.id));
+      }
       setSelectedProject(updatedProject);
+      setPreviousProjectsIds(projects.map((p) => p.id));
     }
   }, [projects]);
 

@@ -107,8 +107,9 @@ const ProjectEditProvider = ({ children }) => {
         console.log("Project saved successfully:", data);
         refetchProjects();
         handleShowProjectInput(false);
-        console.log("Selected Project:", selectedProject);
         handleSelectProject(data.project.id);
+        console.log("Selected Project:", selectedProject);
+
         console.log("Data project selected:", data.project.id);
       },
     });

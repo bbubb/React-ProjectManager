@@ -41,7 +41,7 @@ const ProjectDetails = ({ selectedProject }) => {
         <h2 className="text-3xl md:text-4xl text-stone-600 font-extrabold pt-2">
           {selectedProject?.name}
         </h2>
-        <p className="text-lx md:text-2xl text-stone-500 font-semibold p-8">
+        <p className="text-lx md:text-2xl text-stone-500 font-semibold p-8 whitespace-pre-wrap">
           {selectedProject?.description}
         </p>
         <span className=" text-lg md:text-lx font-semibold text-stone-400">
