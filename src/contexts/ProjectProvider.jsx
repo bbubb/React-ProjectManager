@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import * as ProjectService from "../services/ProjectService";
-import { usePermission } from "../services/PermissionService";
-import { useAuth } from "./AuthProvider";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
+import { usePermission } from "../services/PermissionService";
+import * as ProjectService from "../services/ProjectService";
+import { useAuth } from "./AuthProvider";
 
 const ProjectContext = createContext();
 
@@ -25,12 +25,16 @@ export const ProjectProvider = ({ children }) => {
 
   useEffect(() => {
     if (projects) {
-      let updatedProject;
+      let updatedProject = null;
+
       if (selectedProject) {
         updatedProject = projects.find((p) => p.id === selectedProject.id);
-      } else {
-        updatedProject = projects.find((p) => !previousProjectsIds.includes(p.id));
+      } else if (selectedProject === undefined) {
+        updatedProject = projects.find(
+          (p) => !previousProjectsIds.includes(p.id)
+        );
       }
+
       setSelectedProject(updatedProject);
       setPreviousProjectsIds(projects.map((p) => p.id));
     }

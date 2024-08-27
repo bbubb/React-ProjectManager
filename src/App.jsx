@@ -1,7 +1,7 @@
-import { useAuth, AuthProvider } from "./contexts/AuthProvider";
-import LoginPage from "./components/LoginPage";
-import Dashboard from "./components/Dashboard";
 import { useEffect } from "react";
+import Dashboard from "./components/Dashboard";
+import LoginPage from "./components/LoginPage";
+import { useAuth } from "./contexts/AuthProvider";
 
 function App() {
   const { user, isLoading } = useAuth();

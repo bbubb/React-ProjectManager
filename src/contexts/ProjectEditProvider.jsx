@@ -1,17 +1,17 @@
 import {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
-import { useAuth } from "./AuthProvider";
-import { useProject } from "./ProjectProvider";
+import { useSaveProject } from "../services/ProjectService";
 import {
   useFetchProjectEligibleUsers,
   useFetchProjectUsers,
 } from "../services/UserService";
-import { useSaveProject } from "../services/ProjectService";
+import { useAuth } from "./AuthProvider";
+import { useProject } from "./ProjectProvider";
 
 const ProjectEditContext = createContext();
 
@@ -107,9 +107,8 @@ const ProjectEditProvider = ({ children }) => {
         console.log("Project saved successfully:", data);
         refetchProjects();
         handleShowProjectInput(false);
-        handleSelectProject(data.project.id);
         console.log("Selected Project:", selectedProject);
-
+        handleSelectProject(data.project.id);
         console.log("Data project selected:", data.project.id);
       },
     });

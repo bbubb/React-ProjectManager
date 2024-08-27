@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { useProject } from "../contexts/ProjectProvider";
 import { useDeleteProject } from "../services/ProjectService";
-import { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 
 const ProjectDetails = ({ selectedProject }) => {

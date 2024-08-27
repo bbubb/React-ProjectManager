@@ -1,11 +1,11 @@
-import { useProject } from "../contexts/ProjectProvider";
-import TaskList from "./TaskList";
-import TaskInput from "./TaskInput";
 import { useQueryClient } from "react-query";
+import { useProject } from "../contexts/ProjectProvider";
 import {
   useAddTaskToProject,
   useRemoveTaskFromProject,
 } from "../services/ProjectService";
+import TaskInput from "./TaskInput";
+import TaskList from "./TaskList";
 
 const Task = () => {
   const { selectedProject, refetchProjects, handleSelectProject } = useProject();

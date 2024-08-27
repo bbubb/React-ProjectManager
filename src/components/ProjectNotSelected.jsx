@@ -1,5 +1,5 @@
-import { useProject } from "../contexts/ProjectProvider";
 import noProjectImg from "../assets/no-projects.png";
+import { useProject } from "../contexts/ProjectProvider";
 
 const ProjectNotSelected = () => {
   const { handleShowProjectInput } = useProject();

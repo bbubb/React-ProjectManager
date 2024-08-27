@@ -1,6 +1,6 @@
 // User Service
-import { useQuery, useMutation } from "react-query";
-import { get, post, del } from "./ApiService";
+import { useMutation, useQuery } from "react-query";
+import { del, get, post } from "./ApiService";
 
 export const useFetchUsers = () => {
   return useQuery("users", () => get("/users"), {

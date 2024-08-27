@@ -1,7 +1,7 @@
 // TaskAssignment
-import React, { useState, useEffect } from "react";
-import { useProject } from "../contexts/ProjectProvider";
+import React, { useEffect, useState } from "react";
 import Select from "react-select";
+import { useProject } from "../contexts/ProjectProvider";
 import { useAssignTaskToUser } from "../services/ProjectService";
 import { useFetchTaskEligibleUsers } from "../services/UserService";
 

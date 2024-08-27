@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Select from "react-select";
 
 const ProjectSelectUsers = ({

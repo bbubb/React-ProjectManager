@@ -1,6 +1,6 @@
 // Project Service
-import { useQuery, useMutation } from "react-query";
-import { get, post, put, del } from "./ApiService";
+import { useMutation, useQuery } from "react-query";
+import { del, get, post, put } from "./ApiService";
 
 export const useFetchProjects = () =>
   useQuery("projects", () => get("/projects"), {

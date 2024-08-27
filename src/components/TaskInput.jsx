@@ -7,14 +7,12 @@ const TaskInput = ({ onAddTask }) => {
     const newTaskDescription = inputRef.current.value;
     if (newTaskDescription) {
       onAddTask(newTaskDescription);
-      inputRef.current.value = ""; // clear input field after adding task
+      inputRef.current.value = ""; 
     }
   };
 
-  // if (!selectedProject) return null;
-
   return (
-    <div className=" w-3/4 max-w-4x1 bg-cyan-300">
+    <div className=" w-3/4 max-w-4x1">
       <h2 className="text-2xl md:text-3xl text-stone-600 font-extrabold pb-2">
         Tasks 
         {/* for {selectedProject.name} */}
@@ -22,7 +20,7 @@ const TaskInput = ({ onAddTask }) => {
       <div className="flex justify-start w-2/5 text-xl md:text-2xl">
         <input
           ref={inputRef}
-          className="w-full min-w-max bg-stone-200 rounded-md text-stone-600 font-semibold p-2 outline-blue-500"
+          className="w-full min-w-max bg-stone-200 rounded-md text-stone-600 font-semibold p-2"
           placeholder="Enter new task"
         />
         <button
